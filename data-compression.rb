@@ -8,9 +8,16 @@ def compress_file(input)
   dictionary_value = 256
   i = 0
   current_char = ''
+  change_char = nil
   while i < input.length
-    current_char += input[i]
-    next_char = input[i + 1]
+    
+    if change_char
+      next_char = input[i + 1]
+    else
+      current_char += input[i]
+      next_char = input[i + 1]
+    end
+
     key = current_char + next_char unless next_char.nil?
 
     puts "Current: #{input[i]} Next: #{input[i+1]}"
@@ -19,8 +26,10 @@ def compress_file(input)
       puts "Add to dictionary: #{key} => #{dictionary_value}"
       dictionary_value += 1
       current_char = ''
+      change_char = false
     else
       current_char = key
+      change_char = true
     end
     i += 1
   end
