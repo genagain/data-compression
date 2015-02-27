@@ -1,4 +1,7 @@
 require 'pry'
+
+#the problem is I am adding the current character even
+
 def compress_file(input)
   # input_array = input.split(" ")
   # operation = input_array.first
@@ -121,24 +124,23 @@ def compress_file(input)
 
     key = current_char + next_char unless next_char.nil?
 
-    puts "Output to file: #{current_char}"
-    open(test_compressed, 'a') { |f| f << dictionary[current_char] }
-      
+    unless dictionary.key?(key)
+      open(test_compressed, 'a') { |f| f << dictionary[current_char] }
+    end
 
     puts "Current: #{input[i]} Next: #{input[i+1]}"
-    if dictionary.key?(key) == false
+    if dictionary.key?(key)
+      current_char = key
+      change_char = true
+    else
       dictionary[key] = dictionary_value
       puts "Add to dictionary: #{key} => #{dictionary_value}"
       dictionary_value += 1
       current_char = ''
       change_char = false
-    else
-      current_char = key
-      change_char = true
     end
     i += 1
   end
-  print dictionary
 end
 
 input = 'thisisthe'
