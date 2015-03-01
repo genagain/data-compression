@@ -2,6 +2,26 @@ require 'pry'
 
 #the problem is I am adding the current character even
 
+def write_to_file(test_compressed, dictionary, key, current_char, next_char)
+  if !(dictionary.key?(key)) || next_char.nil?
+    open(test_compressed, 'a') { |f|
+      f << dictionary[current_char] }
+  end
+end
+
+def build_dictionary(dictionary, key)
+  (dictionary.values.max < 256)? value = 255  : value = dictionary.values.max
+  if dictionary.key?(key)
+    current_char = key
+  else
+    value += 1
+    dictionary[key] = value
+    puts "Add to dictionary: #{key} => #{value}"
+    current_char = ''
+  end
+  current_char
+end
+
 def compress_file(input)
   # input_array = input.split(" ")
   # operation = input_array.first
@@ -11,7 +31,7 @@ def compress_file(input)
   test_input = 'text.txt'
   test_compressed = test_input + '.compressed'
 
-  output_file = File.open(test_compressed, "w")
+  File.open(test_compressed, 'w')
   dictionary = {
     ' ' => 32,
     '!' => 33,
@@ -109,36 +129,19 @@ def compress_file(input)
     '}' => 125,
     '~' => 126
   }
-  dictionary_value = 256
   i = 0
-  current_char = ''
-  change_char = nil
+  current_char = input[0]
+
   while i < input.length
-
-    if change_char
-      next_char = input[i + 1]
-    else
-      current_char += input[i]
-      next_char = input[i + 1]
-    end
-
+    current_char += input[i] if current_char == ''
+    next_char = input[i + 1]
     key = current_char + next_char unless next_char.nil?
 
-    unless dictionary.key?(key)
-      open(test_compressed, 'a') { |f| f << dictionary[current_char] }
-    end
+    write_to_file(test_compressed, dictionary, key, current_char, next_char)
 
-    puts "Current: #{input[i]} Next: #{input[i+1]}"
-    if dictionary.key?(key)
-      current_char = key
-      change_char = true
-    else
-      dictionary[key] = dictionary_value
-      puts "Add to dictionary: #{key} => #{dictionary_value}"
-      dictionary_value += 1
-      current_char = ''
-      change_char = false
-    end
+    puts "Output to file: #{current_char} "
+    current_char = build_dictionary(dictionary, key)
+
     i += 1
   end
 end
