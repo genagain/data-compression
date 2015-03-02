@@ -2,10 +2,18 @@ require 'pry'
 
 #the problem is I am adding the current character even
 
+def select_operation(input)
+  # input_array = input.split(" ")
+  # operation = input_array.first
+  # file_name = input_array.last
+
+end
+
 def write_to_file(test_compressed, dictionary, key, current_char, next_char)
   if !(dictionary.key?(key)) || next_char.nil?
     open(test_compressed, 'a') { |f|
-      f << dictionary[current_char] }
+      output_char = dictionary[current_char].to_s(2)
+      f << output_char.to_i }
   end
 end
 
@@ -16,23 +24,20 @@ def build_dictionary(dictionary, key)
   else
     value += 1
     dictionary[key] = value
-    puts "Add to dictionary: #{key} => #{value}"
     current_char = ''
   end
   current_char
 end
 
-def compress_file(input)
-  # input_array = input.split(" ")
-  # operation = input_array.first
-  # file_name = input_array.last
-  # start_size = File.size?(file_name)
+def calc_bit_length(dictionary)
+  max_value = dictionary.values.max
+  n = Math.log(max_value,2)
+  bit_length = n.floor + 1
+end
 
-  test_input = 'text.txt'
-  test_compressed = test_input + '.compressed'
-
-  File.open(test_compressed, 'w')
-  dictionary = {
+def inital_dictionary
+  {
+    '\n' => 10,
     ' ' => 32,
     '!' => 33,
     '"' => 34,
@@ -129,6 +134,22 @@ def compress_file(input)
     '}' => 125,
     '~' => 126
   }
+end
+
+def compress_file()
+
+  test_input = 'test.txt'
+  start_size = File.size(test_input)
+
+  puts "Start size: #{start_size}"
+  test_compressed = test_input + '.compressed'
+  file = File.open(test_input)
+  unsanitized_input = file.read
+  input = unsanitized_input.gsub(/\n/, ' ')
+  File.open(test_compressed, 'w')
+
+  dictionary = inital_dictionary
+
   i = 0
   current_char = input[0]
 
@@ -139,13 +160,17 @@ def compress_file(input)
 
     write_to_file(test_compressed, dictionary, key, current_char, next_char)
 
-    puts "Output to file: #{current_char} "
+    # puts "Output to file: #{current_char} "
     current_char = build_dictionary(dictionary, key)
 
     i += 1
+
   end
+  finish_size = File.size(test_compressed)
+  puts "Finish size: #{finish_size}"
+  puts calc_bit_length(dictionary)
 end
 
 input = 'thisisthe'
 # input = ARGV.join(" ")
-compress_file(input)
+compress_file()
