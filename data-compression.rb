@@ -9,15 +9,15 @@ def select_operation(input)
 
 end
 
-def write_to_file(test_compressed, dictionary, key, current_char, next_char)
-  if !(dictionary.key?(key)) || next_char.nil?
-    open(test_compressed, 'a') { |f|
-      output_char = dictionary[current_char].to_s(2)
-      f << output_char.to_i }
+
+def write_to_file(test_compressed, output)
+  output.delete(nil)
+  File.open(test_compressed, 'w') do |file|
+    file.write(output.pack('U*'))
   end
 end
 
-def build_dictionary(dictionary, key)
+def add_to_dictionary(dictionary, key)
   (dictionary.values.max < 256)? value = 255  : value = dictionary.values.max
   if dictionary.key?(key)
     current_char = key
@@ -137,38 +137,40 @@ def inital_dictionary
 end
 
 def compress_file()
-
-  test_input = 'test.txt'
+  test_input = 'the_last_question.txt'
   start_size = File.size(test_input)
 
   puts "Start size: #{start_size}"
   test_compressed = test_input + '.compressed'
   file = File.open(test_input)
-  unsanitized_input = file.read
-  input = unsanitized_input.gsub(/\n/, ' ')
-  File.open(test_compressed, 'w')
-
+  input = file.read
   dictionary = inital_dictionary
 
   i = 0
   current_char = input[0]
+  output = []
 
-  while i < input.length
-    current_char += input[i] if current_char == ''
-    next_char = input[i + 1]
-    key = current_char + next_char unless next_char.nil?
-
-    write_to_file(test_compressed, dictionary, key, current_char, next_char)
-
-    # puts "Output to file: #{current_char} "
-    current_char = build_dictionary(dictionary, key)
+  input.each_char.with_index do |char, i|
+    current_char += char if current_char == ''
+    key = current_char + input[i + 1] unless input[i + 1].nil?
+    if !(dictionary.key?(key)) || input[i + 1].nil?
+      output << dictionary[current_char]
+    end
+    current_char = add_to_dictionary(dictionary, key)
 
     i += 1
-
   end
+  write_to_file(test_compressed, output)
   finish_size = File.size(test_compressed)
-  puts "Finish size: #{finish_size}"
   puts calc_bit_length(dictionary)
+end
+
+def decompress()
+  decompress_file = "the_last_question.txt.compressed"
+  packed_input = File.open(decompress_file)
+  unpacked_input = packed_input.unpack("U*")
+  
+
 end
 
 input = 'thisisthe'
